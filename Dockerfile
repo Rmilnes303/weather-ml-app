@@ -4,7 +4,7 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Install dependencies
-RUN pip install Flask gunicorn
+RUN pip install Flask gunicorn numpy scikit-learn
 
 # Copy the rest of the application code
 COPY . .
