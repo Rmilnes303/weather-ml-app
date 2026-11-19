@@ -1,0 +1,43 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: [ "CI" ]
+    types: [ completed ]
+    branches: [ main ]
+
+jobs:
+  deploy:
+    # (g) Only deploy builds that passed CI and came from a push
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/flask-app:${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Check out the tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply manifests with the new image
+        run: envsubst < k8s/deployment.yaml | kubectl apply -f -
+
+      # Rolling update: new pods must pass the readiness probe before old pods are removed
+      - name: Wait for rollout to finish
+        run: kubectl rollout status deployment/flask-app --timeout=180s
+
+      - name: Roll back if the rollout failed
+        if: failure()
+        run: kubectl rollout undo deployment/flask-app
