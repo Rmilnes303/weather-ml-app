@@ -1,0 +1,26 @@
+---
+- name: Deploy Weather ML application to Kubernetes
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Apply Kubernetes deployment configuration
+      ansible.builtin.command:
+        cmd: kubectl apply -f weather-ml-deployment.yml
+      register: deployment_result
+      changed_when: "'created' in deployment_result.stdout or 'configured' in deployment_result.stdout"
+    
+    - name: Display deployment result
+      ansible.builtin.debug:
+        var: deployment_result.stdout
+
+    - name: Check deployment status
+      ansible.builtin.command:
+        cmd: kubectl get deployments
+      register: deployment_status
+      changed_when: false
+
+    - name: Display deployment status
+      ansible.builtin.debug:
+        var: deployment_status.stdout_lines
