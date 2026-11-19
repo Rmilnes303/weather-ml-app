@@ -30,13 +30,15 @@ jobs:
             python -m pip install --upgrade pip
             pip install -r requirements.txt pytest
 
-	-name: Run test file 1
-        run: pytest tests/test_routes.py -v
+	-name: Run Integration Test
+        run: pytest integration_test.py -v
 
-      - name: Run test file 2
-        run: pytest tests/test_models.py -v
+      - name: Run Smoke Test
+        run: pytest smoke_test.py -v
 
-      # (d) Build the Docker image
+      - name: Run Unit Test
+        run: pytest unit_test.py -v
+		
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -47,7 +49,6 @@ jobs:
           load: true
           tags: ${{ env.IMAGE_NAME }}:test
 
-      # (e) Check that a container launches from the image
       - name: Launch container and check it responds
         run: |
           docker run -d --name flask-test -p 5000:5000 ${{ env.IMAGE_NAME }}:test
@@ -68,7 +69,6 @@ jobs:
         if: always()
         run: docker rm -f flask-test || true
 
-      # (f) Push to Docker Hub (only on pushes to main, not pull requests)
       - name: Log in to Docker Hub
         if: github.event_name == 'push'
         uses: docker/login-action@v3
