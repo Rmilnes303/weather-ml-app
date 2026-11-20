@@ -1,0 +1,41 @@
+---
+- name: Scale Weather ML Kubernetes deployment
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Scale Weather ML application to three replicas
+      ansible.builtin.command:
+        cmd: kubectl scale deployment weather-ml-app --replicas=3
+      register: scale_result
+      changed_when: "'scaled' in scale_result.stdout"
+
+    - name: Display scaling result
+      ansible.builtin.debug:
+        var: scale_result.stdout
+
+    - name: Wait for all three replicas to become ready
+      ansible.builtin.command:
+        cmd: kubectl rollout status deployment/weather-ml-app --timeout=180s
+      changed_when: false
+
+    - name: Display deployment status
+      ansible.builtin.command:
+        cmd: kubectl get deployments
+      register: deployment_status
+      changed_when: false
+
+    - name: Show deployment status
+      ansible.builtin.debug:
+        var: deployment_status.stdout_lines
+
+    - name: Display running pods
+      ansible.builtin.command:
+        cmd: kubectl get pods
+      register: pod_status
+      changed_when: false
+
+    - name: Show running pods
+      ansible.builtin.debug:
+        var: pod_status.stdout_lines

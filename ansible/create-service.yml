@@ -1,0 +1,26 @@
+---
+- name: Create Kubernetes Service for Weather ML application
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Apply Kubernetes Service configuration
+      ansible.builtin.command:
+        cmd: kubectl apply -f weather-ml-service.yml
+      register: service_result
+      changed_when: "'created' in service_result.stdout or 'configured' in service_result.stdout"
+
+    - name: Display Service creation result
+      ansible.builtin.debug:
+        var: service_result.stdout
+
+    - name: Check Kubernetes Service
+      ansible.builtin.command:
+        cmd: kubectl get services
+      register: service_status
+      changed_when: false
+
+    - name: Display Service status
+      ansible.builtin.debug:
+        var: service_status.stdout_lines
