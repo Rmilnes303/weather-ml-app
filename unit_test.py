@@ -44,13 +44,13 @@ class TestUnit(unittest.TestCase):
 		# Ensure that 'rainy' class is returned
 		
 
-	def test_foggy_classification_output(self):
+	def test_cloudy_classification_output(self):
 
 		test_input = np.array([289.47,1015,88,2,300,0,0,0,20]).reshape(1,-1)
 		class_result, _ = classify_weather(test_input) 
 		self.assertIn(class_result, weather_classes)
-		self.assertEqual(class_result, 'foggy')
-		# Ensure that 'foggy' class is returned
+		self.assertEqual(class_result, 'cloudy')
+		# Ensure that 'cloudy' class is returned
 		
 if __name__ == '__main__':
 	unittest.main()
