@@ -23,10 +23,10 @@ spec:
         - name: weather-ml-app
           image: ${IMAGE}
           ports:
-            - containerPort: 8000   # change to the port your app listens on
+            - containerPort: 5000   # change to the port your app listens on
           readinessProbe:
             httpGet:
               path: /health         # change to a real endpoint in your app
-              port: 8000
+              port: 5000
             initialDelaySeconds: 5
             periodSeconds: 10
