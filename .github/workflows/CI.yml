@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-      IMAGE_NAME: flask-app
+      IMAGE_NAME: weather-ml-app
 
     steps:
       - name: Check out repository
@@ -49,7 +49,7 @@ jobs:
 
       - name: Launch container and check it responds
         run: |
-          docker run -d --name flask-test -p 5000:5000 ${{ env.IMAGE_NAME }}:test
+          docker run -d --name weather-ml-app -p 5000:5000 ${{ env.IMAGE_NAME }}:test
           for i in $(seq 1 15); do
             status=$(docker inspect -f '{{.State.Running}}' flask-test)
             code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/ || true)
