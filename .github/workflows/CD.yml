@@ -25,14 +25,6 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
-      - name: Configure kubeconfig
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-        run: |
-          mkdir -p ~/.kube
-          echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-
       - name: Debug kubeconfig
         run: |
           test -s ~/.kube/config || { echo "kubeconfig is empty"; exit 1; }
