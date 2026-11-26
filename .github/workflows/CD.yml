@@ -2,13 +2,13 @@ name: CD
 
 on:
   workflow_run:
-    workflows: [ "CI" ]
-    types: [ completed ]
-    branches: [ main ]
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   deploy:
-    # (g) Only deploy builds that passed CI and came from a push
+    # Only deploy builds that passed CI and came from a push
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
@@ -26,12 +26,18 @@ jobs:
         uses: azure/setup-kubectl@v4
 
       - name: Configure kubeconfig
-        env: 
-          KUBE_CONFIG : ${{secrets.KUBE_CONFIG }} 
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
           mkdir -p ~/.kube
           echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
+
+      - name: Debug kubeconfig
+        run: |
+          test -s ~/.kube/config || { echo "kubeconfig is empty"; exit 1; }
+          kubectl config current-context
+          kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'; echo
 
       - name: Apply manifests with the new image
         run: envsubst < k8s/deployment.yaml | kubectl apply -f -
