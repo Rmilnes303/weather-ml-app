@@ -33,12 +33,6 @@ jobs:
           echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Debug kubeconfig
-        run: |
-          test -s ~/.kube/config || { echo "kubeconfig is empty"; exit 1; }
-          kubectl config current-context
-          kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'; echo
-
       - name: Apply manifests with the new image
         run: envsubst < k8s/deployment.yaml | kubectl apply -f -
 
