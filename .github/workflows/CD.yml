@@ -26,9 +26,11 @@ jobs:
         uses: azure/setup-kubectl@v4
 
       - name: Configure kubeconfig
+        env: 
+          KUBE_CONFIG : ${{secrets.KUBECONFIG }} 
         run: |
           mkdir -p ~/.kube
-          base64 -d > ~/.kube/config
+          echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
       - name: Apply manifests with the new image
@@ -36,8 +38,9 @@ jobs:
 
       # Rolling update: new pods must pass the readiness probe before old pods are removed
       - name: Wait for rollout to finish
+        id: rollout
         run: kubectl rollout status deployment/weather-ml-app --timeout=180s
 
       - name: Roll back if the rollout failed
-        if: failure()
+        if: steps.rollout.outcome == 'failure'
         run: kubectl rollout undo deployment/weather-ml-app
