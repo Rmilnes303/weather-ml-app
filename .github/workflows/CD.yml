@@ -36,8 +36,8 @@ jobs:
 
       # Rolling update: new pods must pass the readiness probe before old pods are removed
       - name: Wait for rollout to finish
-        run: kubectl rollout status deployment/flask-app --timeout=180s
+        run: kubectl rollout status deployment/weather-ml-app --timeout=180s
 
       - name: Roll back if the rollout failed
         if: failure()
-        run: kubectl rollout undo deployment/flask-app
+        run: kubectl rollout undo deployment/weather-ml-app
